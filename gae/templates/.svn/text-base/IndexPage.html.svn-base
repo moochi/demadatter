@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>demadattar</title>
+	<meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1.0,maximum-scale=3.0" />
+
+	<!-- <script type="text/javascript">  -->
+		<!-- var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www."); -->
+		<!-- document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E")); -->
+	<!-- </script>  -->
+	<!-- <script type="text/javascript">  -->
+		<!-- var pageTracker = _gat._getTracker("UA-4163455-3"); -->
+		<!-- pageTracker._trackPageview(); -->
+	<!-- </script>  -->
+
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css" />
+	<script src="http://code.jquery.com/jquery-1.5.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js"></script>
+
+</head>
+<body>
+		<div data-role="page"> 
+
+			<div data-role="header" data-theme="b"> 
+				<h1>デマだったー</h1> 
+			</div><!-- /header --> 
+
+			<div data-role="content"> 
+				<ol data-role="listview" data-theme="d" data-inset="true"> 
+					{% for item in list %}
+					<li>
+					{{ forloop.counter }}.【デマった数：{{ item.count }}】<br>
+					{{ item.tweet }}<br>
+					<div style="text-align:right">{{ item.screen_name }}{% if item.user_name %}({{ item.user_name }}){% endif %}</div>
+					<div style="text-align:right">【投稿日：{{ item.createdat }}】</div>
+					</li> 
+					{% endfor %}
+				</ol> 
+			</div><!-- /content --> 
+		</div><!-- /page --> 
+
+</body>
+</html>

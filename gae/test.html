@@ -1,0 +1,18 @@
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  </head>
+  <body>
+	ローカルテスト用<br />
+	<form action="http://localhost:8080/v1/add" method="post">
+	  token : <input name="token" /><br />
+	  id : <input name="tweetid" value="123456" /><input type="button" value="確認" onclick="location.href = 'http://localhost:8080/v1/count?token='+this.form.token.value+'&tweetid='+this.form.tweetid.value;" /><br />
+	  text : <input name="tweet" value="This is test." /><br />
+	  user_screen_name : <input name="screen_name" value="testman" /><br />
+	  user_name : <input name="user_name" value="てすとさん" /><br />
+	  created_at : <input name="created_at" value="1300566374" /><br />
+	  <input type="submit" />
+	</form>
+	<a href="http://localhost:8080/v1/">ランキング</a>
+  </body>
+</html>
