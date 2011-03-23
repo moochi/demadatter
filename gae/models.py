@@ -1,3 +1,10 @@
+# coding: UTF-8
+from google.appengine.ext import db
+
+class User(db.Model):
+    name = db.StringProperty()
+
+
 # -*- coding: utf-8 -*-
 
 from google.appengine.ext import db
@@ -104,3 +111,4 @@ class Report(db.Model):
     token = db.StringProperty()
     # ツイートID
     tweetid = db.StringProperty()
+
