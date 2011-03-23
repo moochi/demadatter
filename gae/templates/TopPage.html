@@ -13,8 +13,26 @@
   <body>
     <div data-role="page"> 
         <h1 style="text-align:center">デマだったーTOP</h1>
-        <center><a href="/static/v2/top.html">モバイル版 トップページへ</a></center>
-    </div><!-- /page --> 
+        <center>
+        <a href="/static/v2/top.html">モバイル版 トップページ</a>
+        </center>
+<hr>
+    デマ投稿Form<br />
+    <form action="/v2/post" method="get">
+    reporter_id : <input name="reporter_id" /><br />
+    Tweet_id : <input name="tweet_id" value="" /><br />
+    Flag : <input name="flag" value="1" /><br />
+    <input type="button" value="確認" onclick="location.href = '/v2/api/post?reporter_id='+this.form.reporter_id.value+'&tweet_id='+this.form.tweet_id.value+'&flag='+this.form.flag.value;" /><br />
+    <hr>
+
+    </div>
+<!-- /page --> 
+
+
+
+
+
+
   </body>
 </html>
                 
