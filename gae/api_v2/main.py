@@ -26,10 +26,14 @@ import models
 v2_app = Module(__name__)
 
 """デマレポート処理"""
-@v2_app.route('/api/post/<int:flag>/<int:reporter_id>/<int:tweet_id>',
-              methods=['GET', 'POST'])
-def dema_add(flag, reporter_id, tweet_id):
-    reporter_id  = '1'
+#@v2_app.route('/api/post/<int:flag>/<int:reporter_id>/<int:tweet_id>',
+@v2_app.route('/api/post', methods=['GET', 'POST'])
+def dema_add():
+    tweet_id = int(request.args.get('tweet_id'))
+    reporter_id = request.args.get('reporter_id')
+    #reporter_id  = '1'  # todo: OAuthでトークン実装するまでのつなぎ
+    flag = int(request.args.get('flag'))
+
     logging.info(tweet_id)
     twit_data =  get_status_by_tweet_id(tweet_id)
 
@@ -43,7 +47,7 @@ def dema_add(flag, reporter_id, tweet_id):
                  tweeted_at = twit_data['created_at']
                  )
 
-    ## Reportを作る
+    ## Reportを生成　デマレートを計算して保存
     repo = models.Report.get_or_insert(
                          key_name = "%s_%s"%(user_obj.user_id, tweet_obj.tweet_id), 
                          reporter = user_obj, 
@@ -55,31 +59,29 @@ def dema_add(flag, reporter_id, tweet_id):
     dema_delta = [0, 0]
 
     if before_flag == 1:
-         dema_delta[0] -= 1
+        dema_delta[0] -= 1
     elif before_flag == -1:
-         dema_delta[1] -= 1
+        dema_delta[1] -= 1
 
     if flag == 1:
-         dema_delta[0] += 1
+        dema_delta[0] += 1
     elif flag == -1:
-         dema_delta[1] += 1
+        dema_delta[1] += 1
 
     tweet_obj.set_dema_cnt(*dema_delta)
     tweet_obj.put()
      
     repo.put()
     res = {'staus':'ok'} 
-    #res_json = json.dumps(res, indent=1, ensure_ascii=False)
     res_json = json.dumps(res)
     return res_json
 
 
-# デマレポート処理
+# デマレポート処理  ###################################################
 #@v2_app.route('/api/entry/<tweet_id_arg>')
-@v2_app.route('/api/entry/<tweet_id_arg>', methods=['GET', 'POST'])
-def dema_get(tweet_id_arg):
-    #tweet_id = int(request.form['tweet_id'])
-    tweet_id = int(tweet_id_arg)
+@v2_app.route('/api/entry', methods=['GET', 'POST'])
+def dema_get():
+    tweet_id = int(request.args.get('tweet_id'))
 
     #Response(headers)['Content-Type'] = 'application/json'
     try:
@@ -104,19 +106,16 @@ def show_tweet(tweet_id):
     return json.dumps(ret)
 
 
-# デマレポート処理
-@v2_app.route('/api/ranking/<type>', methods=['GET', 'POST'])
-def dema_ranking(type):
+# デマレポート処理  #####################################################
+@v2_app.route('/api/ranking', methods=['GET', 'POST'])
+def dema_ranking():
       # TODO: ユーザ認証
       #token = getToken(self.request.get('token'))
       #result = ['token=%s' % token]
 
       #self.response.headers['Content-Type'] = 'application/json'
 
-      #type_str = self.request.get('type', 'rate')
-      #type_str = request.form['type', 'rate']
-      #type_str = request.form['type']
-      type_str = type
+      type_str = request.args.get('type', 'rate')
       if type_str not in ["rate", "date"]:
           return json.dumps({"status": "ng", "text": "invalid type" })
       try:
@@ -138,9 +137,22 @@ def show_rank(type_str):
     return json.dumps({
         "statuss":"success", 
         "type": type_str,
-        "tw": [tweet_to_obj(t) for t in tweets]
+        "tweets": [tweet_to_obj(t) for t in tweets]
         })
 
+def tweet_to_obj(tweet):
+    """ Convert tweet model to object. """
+    return {"tweet_id": tweet.tweet_id,
+            "text": tweet.tweet,
+            "user": {
+                "name": "nitoyon",       #tweet.user.name,
+                "screen_name": "nitoyon",#tweet.user.screen_name
+                "id": 1,
+            },
+            "dema_count": tweet.dema_count,
+            "non_dema_count": tweet.non_dema_count,
+            "dema_score": tweet.dema_score,
+           }    
 
 #######  Utility
 def save_create_twit(tweet_id, tweet, user,tweeted_at):
@@ -163,19 +175,5 @@ def save_create_twit(tweet_id, tweet, user,tweeted_at):
 def get_user(user_id):
     usr = models.User.get_or_insert(key_name = str(user_id), user_id = int(user_id) )
     return usr
-
-def tweet_to_obj(tweet):
-    """ Convert tweet model to object. """
-    return {"tweet_id": tweet.tweet_id,
-            "text": tweet.tweet,
-            "user": {
-                "name": "nitoyon",#tweet.user.name,
-                "screen_name": "nitoyon",#tweet.user.screen_name
-                "id": 1,
-            },
-            "dema_count": tweet.dema_count,
-            "non_dema_count": tweet.non_dema_count,
-            "dema_score": tweet.dema_score,
-           }    
 
 

@@ -56,7 +56,7 @@ def before_request():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('TopPage.html')
 
 
 from api_v1.main import v1_app
