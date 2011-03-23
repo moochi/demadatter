@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+		  package="to.tes.demadatter"
+		  android:versionCode="1"
+		  android:versionName="1.0">
+
+  <application
+	 android:label="@string/app_name"
+	 android:icon="@drawable/dt_btn"
+	 >
+	<activity
+	   android:name="MainActivity"
+	   android:label="@string/app_name"
+	   android:theme="@android:style/Theme.Dialog"
+	   >
+	  <intent-filter>
+		<action android:name="jp.r246.twicca.ACTION_SHOW_TWEET" />
+		<category android:name="android.intent.category.DEFAULT" />
+	  </intent-filter>
+	</activity>
+  </application>
+  <uses-sdk android:minSdkVersion="4" />
+
+  <uses-permission android:name="android.permission.INTERNET" />
+</manifest>
