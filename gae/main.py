@@ -65,7 +65,7 @@ app.register_module(v1_app,  url_prefix='/v1')
 from api_v2.main import v2_app
 app.register_module(v2_app,  url_prefix='/v2')
 
-
+_debugged_app = None
 if 'SERVER_SOFTWARE' in os.environ and os.environ['SERVER_SOFTWARE'].startswith('Dev'):
     # use our debug.utils with Jinja2 templates
     import debug.utils
@@ -77,7 +77,11 @@ if 'SERVER_SOFTWARE' in os.environ and os.environ['SERVER_SOFTWARE'].startswith(
 
     # wrap the application
     from werkzeug import DebuggedApplication
-app = DebuggedApplication(app, evalex=True)
+    if _debugged_app is None:
+        _debugged_app = app = DebuggedApplication(app, evalex=True)
+    else:
+        app = _debugged_app             
+#app = DebuggedApplication(app, evalex=True)
 
 CGIHandler().run(recording.appstats_wsgi_middleware(app))
 

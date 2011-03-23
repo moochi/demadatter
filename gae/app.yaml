@@ -1,5 +1,5 @@
-application: deck-flask-gae
-version: 1
+application: demadatter-dev
+version: 1000
 runtime: python
 api_version: 1
 
