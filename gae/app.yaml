@@ -1,5 +1,5 @@
-application: your-app-name-here
-version: 1
+application: demadatter-dev
+version: 1000
 runtime: python
 api_version: 1
 
@@ -52,10 +52,6 @@ handlers:
 - url: /img/(.*\.(gif|png|jpg))
   static_files: static/img/\1
   upload: static/img/(.*\.(gif|png|jpg))
-
-- url: /swf/(.*\.swf)
-  static_files: static/swf/\1
-  upload: static/swf/(.*\.swf)
 
 - url: /css/(.*\.css)
   mime_type: text/css
