@@ -4,27 +4,11 @@ Python Datastore API: http://code.google.com/appengine/docs/python/datastore/
 """
 
 from google.appengine.ext import db
-
-
-class Todo(db.Model):
-    text = db.StringProperty()
-    created_at = db.DateTimeProperty(auto_now=True)
-
-
-class User(db.Model):
-    name = db.StringProperty()
-
-
-# -*- coding: utf-8 -*-
-
-from google.appengine.ext import db
-
-
 class User(db.Model):
     u"""ユーザ情報
     key_name… user_id"""
     # TwitterUserID
-    user_id = db.IntegerProperty()
+    user_id = db.StringProperty()
     # デマ数
     dema_count = db.IntegerProperty()
     # デマ率（発言数におけるデマ率）
@@ -41,6 +25,9 @@ class User(db.Model):
     token = db.StringProperty()
     # トークンの長さ
     #TOKEN_LENGTH = 20
+    twitter_oauth_token = db.StringProperty()
+    twitter_oauth_secret = db.StringProperty()
+
 
 class Reporter(db.Model):
     u"""デマ通報者
