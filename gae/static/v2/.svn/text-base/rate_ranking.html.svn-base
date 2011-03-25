@@ -1,0 +1,58 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<title>Page Title</title> 
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css" />
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.3.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js"></script>
+	<META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=UTF-8">
+</head> 
+<body> 
+
+<div data-role="page" id="rate_ranking">
+
+	<div data-role="header">
+		<h1>デマレート順表示</h1>
+	</div>
+
+	<div data-role="content">
+		<ul data-role="listview" id="rate_entry_list">
+		</ul>
+	</div>
+
+	<div data-role="footer">
+		<h4>Page Footer</h4>
+	</div>
+	
+<script type="text/javascript">
+$(function(){
+
+	var callback = function(results){
+		var entryList = $('#rate_entry_list');
+		
+		for(var i=0; i<results.tweets.length; i++) {
+			var tweet = results.tweets[i];
+			
+			var li = $('<li></li>').
+				append($('<h2></h2>').text(tweet.text)).
+				append($('<p></p>').text(tweet.user.name + "(" + tweet.user.screen_name +")")).
+				append($('<h2 style="color:red;"></h2>').text('デマ：' + tweet.dema_count + '(' + (tweet.dema_score * 100) + '%)')).
+				append($('<h2 style="color:blue;"></h2>').text('デマじゃない：' + tweet.non_dema_count));
+
+			entryList.append(li);
+		}
+
+		entryList.listview('refresh');	// 最後に更新		
+	};
+		// API call
+	$.getJSON('/v2/api/ranking',
+			{type : 'rate'},
+			callback);
+
+});
+</script>
+	
+</div>
+
+</body>
+</html>
