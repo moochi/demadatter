@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			  android:layout_width="wrap_content"
+			  android:layout_height="wrap_content"
+			  android:orientation="vertical"
+			  android:background="#000000"
+			  >
+
+  <!-- ユーザ情報 -->
+  <LinearLayout
+	  android:layout_width="fill_parent"
+	  android:layout_height="wrap_content"
+	  android:layout_marginLeft="5dp"
+	  android:layout_marginTop="5dp"
+	  android:layout_marginRight="5dp"
+	  android:orientation="horizontal"
+	  >
+	<LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:layout_weight="1"
+		>
+	  <TextView
+		  android:id="@+id/main_name_text"
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content"
+		  style="@style/ScreenName"
+		  />
+	  <TextView
+		  android:id="@+id/main_user_text"
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content"
+		  android:layout_marginLeft="5dp"
+		  style="@style/UserName"
+		  />
+	</LinearLayout>
+	<TextView
+		android:id="@+id/main_date_text"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		style="@style/CreatedTime"
+		/>
+  </LinearLayout>
+
+  <!-- ツイート表示 -->
+  <TextView
+	 android:id="@+id/main_tweet_text"
+	 android:layout_width="fill_parent"
+	 android:layout_height="wrap_content"
+	 android:layout_marginLeft="5dp"
+	 android:layout_marginRight="5dp"
+	 style="@style/Tweet"
+	 />
+
+  <!-- デマ件数 -->
+  <FrameLayout
+	 android:layout_width="fill_parent"
+	 android:layout_height="wrap_content"
+	 android:layout_weight="1"
+	 >
+	<TextView
+	   android:id="@+id/main_count_text"
+	   android:layout_width="fill_parent"
+	   android:layout_height="wrap_content"
+	   style="@style/DemaCount"
+	   />
+	<TextView
+	   android:id="@+id/main_counting_text"
+	   android:layout_width="fill_parent"
+	   android:layout_height="wrap_content"
+	   android:text="@string/counting"
+	   style="@style/Counting"
+	   />
+  </FrameLayout>
+
+  <LinearLayout
+	 android:layout_width="fill_parent"
+	 android:layout_height="wrap_content"
+	 android:orientation="horizontal"
+	 android:gravity="center"
+	 >
+	<!-- ランキング -->
+	<ImageView
+	   android:layout_width="wrap_content"
+	   android:layout_height="wrap_content"
+	   android:src="@drawable/ranking"
+	   />
+	<Button
+	   android:id="@+id/main_ranking_btn"
+	   android:layout_width="wrap_content"
+	   android:layout_height="wrap_content"
+	   android:text="@string/ranking_btn"
+	   />
+
+	<!-- DTボタン -->
+	<Button
+	   android:id="@+id/main_dt_btn"
+	   android:layout_width="wrap_content"
+	   android:layout_height="wrap_content"
+	   android:layout_marginLeft="20dp"
+	   android:background="@drawable/dt_btn"
+	   />
+
+	<!-- デマ通報ボタン -->
+	<Button
+	   android:id="@+id/main_report_btn"
+	   android:layout_width="wrap_content"
+	   android:layout_height="wrap_content"
+	   android:layout_marginLeft="20dp"
+	   android:background="@drawable/report_btn"
+	   />
+  </LinearLayout>
+</LinearLayout>
