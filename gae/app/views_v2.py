@@ -12,11 +12,11 @@
 ('/v2/api/ranking', DemaRanking),  
 '''
 
-import os, sys
+import os, sys, codecs
 root_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(root_dir, 'lib'))
 
-from flask import Module,  render_template
+from flask import Module,  render_template, session
 from flask import make_response, Response
 from flask import request
 from flask import json
@@ -26,23 +26,24 @@ import models
 views_v2 = Module(__name__)
 
 """デマレポート処理"""
-#@views_v2.route('/api/post/<int:flag>/<int:reporter_id>/<int:tweet_id>',
 @views_v2.route('/api/post', methods=['GET', 'POST'])
 def dema_add():
     tweet_id = int(request.args.get('tweet_id'))
-    reporter_id = request.args.get('reporter_id')
+    #reporter_id = str(request.args.get('reporter_id'))
+    reporter_id = session['user_id']
     #reporter_id  = '1'  # todo: OAuthでトークン実装するまでのつなぎ
     flag = int(request.args.get('flag'))
+    
 
-    logging.info(tweet_id)
     twit_data =  get_status_by_tweet_id(tweet_id)
 
     ## Tweetを作る
     tweet = twit_data[u'text']  # twit の本文
+
     user_obj = get_user(reporter_id)  # レポートする人のUserObject
     tweet_obj = save_create_twit(
                  tweet_id   = tweet_id, 
-                 tweet      = tweet, 
+                 tweet      = '', #tweet.decode('utf-8'), 
                  user       = user_obj, 
                  tweeted_at = twit_data['created_at']
                  )
@@ -81,6 +82,8 @@ def dema_add():
 #@views_v2.route('/api/entry/<tweet_id_arg>')
 @views_v2.route('/api/entry', methods=['GET', 'POST'])
 def dema_get():
+    if g.user is None:
+        return redirect(url_for('login', next=request.url)) 
     tweet_id = int(request.args.get('tweet_id'))
 
     #Response(headers)['Content-Type'] = 'application/json'
@@ -173,7 +176,7 @@ def save_create_twit(tweet_id, tweet, user,tweeted_at):
     
 
 def get_user(user_id):
-    usr = models.User.get_or_insert(key_name = str(user_id), user_id = int(user_id) )
+    usr = models.User.get_or_insert(key_name = user_id, user_id = user_id )
     return usr
 
 
