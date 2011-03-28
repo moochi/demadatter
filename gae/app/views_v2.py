@@ -28,23 +28,18 @@ views_v2 = Module(__name__)
 """デマレポート処理"""
 @views_v2.route('/api/post', methods=['GET', 'POST'])
 def dema_add():
-    tweet_id = int(request.args.get('tweet_id'))
-    #reporter_id = str(request.args.get('reporter_id'))
     reporter_id = session['user_id']
-    #reporter_id  = '1'  # todo: OAuthでトークン実装するまでのつなぎ
-    flag = int(request.args.get('flag'))
+    flag = request.args.get('flag', type=int)
+    tweet_id = request.args.get('tweet_id', type=int)
     
-
+   # tweet obj作成
     twit_data =  get_status_by_tweet_id(tweet_id)
-
-    ## Tweetを作る
-    tweet = twit_data[u'text']  # twit の本文
 
     user_obj = get_user(reporter_id)  # レポートする人のUserObject
     tweet_obj = save_create_twit(
-                 tweet_id   = tweet_id, 
-                 tweet      = tweet, 
                  user       = user_obj, 
+                 tweet_id   = tweet_id, 
+                 tweet      = twit_data['text'], 
                  tweeted_at = twit_data['created_at']
                  )
 
@@ -79,12 +74,12 @@ def dema_add():
 
 
 # デマレポート処理  ###################################################
-#@views_v2.route('/api/entry/<tweet_id_arg>')
 @views_v2.route('/api/entry', methods=['GET', 'POST'])
 def dema_get():
     if g.user is None:
         return redirect(url_for('login', next=request.url)) 
-    tweet_id = int(request.args.get('tweet_id'))
+    tweet_id = request.args.get('tweet_id', type=int)
+    user_obj = get_user(reporter_id)  # レポートする人のUserObject
 
     #Response(headers)['Content-Type'] = 'application/json'
     try:
@@ -109,7 +104,7 @@ def show_tweet(tweet_id):
     return json.dumps(ret)
 
 
-# デマレポート処理  #####################################################
+# デマランキング処理  #####################################################
 @views_v2.route('/api/ranking', methods=['GET', 'POST'])
 def dema_ranking():
       # TODO: ユーザ認証
@@ -165,7 +160,6 @@ def save_create_twit(tweet_id, tweet, user,tweeted_at):
     user : 投稿者のUserエンティティ
     """
     import datetime
-    #print tweeted_at
     dd = datetime.datetime.strptime(tweeted_at, '%a %b %d %H:%M:%S +0000 %Y')
     entity = models.Tweet.get_or_insert(key_name = str(tweet_id),
                                         tweet_id = tweet_id,

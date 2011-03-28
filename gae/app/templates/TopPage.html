@@ -4,18 +4,19 @@
     <meta charset="utf-8" />
     <title>demadattar</title>
     <meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1.0,maximum-scale=3.0" />
-
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css" />
     <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
-
   </head>
   <body>
-        <h1 style="text-align:center">デマだったーTOP</h1>
-        <center>
-        <a href="/mobile">モバイル版 トップページ(要twitter認証)</a><br>
 
-        </center>
-<hr>
+  <h1 style="text-align:center">デマだったーTOP</h1>
+  <center>
+  <a href="/mobile">モバイル版 トップページ(要Login)</a><br>
+
+{% if p.usr %}
+{{ p.user }}
+<a href="/logout">ログアウト</a><p>
+
     デマ投稿Form<br />
     <form action="/v2/post" method="get">
     reporter_id : <input name="reporter_id" /><br />
@@ -26,13 +27,28 @@
 
     <div data-role="page"> 
     </div>
-<!-- /page --> 
+
+  </center>
+
+{% endif %}
+{% if not p.usr %}
+{{ p.user }}
+<a href="/login">ログイン</a><br>
+{% endif %}
 
 
-        <a href="/login">ログイン</a><br>
-        <a href="/logout">ログアウト</a>
 
 
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 
 
 

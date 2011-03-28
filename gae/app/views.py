@@ -24,8 +24,8 @@ twitter = oauth.remote_app('twitter',
     # they mostly work the same, but for sign on /authenticate is
     # expected because this will give the user a slightly different
     # user interface on the twitter side.
-    #authorize_url='http://api.twitter.com/oauth/authenticate',
-    authorize_url='https://api.twitter.com/oauth/authorize',
+    authorize_url='http://api.twitter.com/oauth/authenticate',
+    #authorize_url='https://api.twitter.com/oauth/authorize',
     consumer_key='qbAWqQcTBtOxPqbTh5Uag',
     consumer_secret='TdKlsHpqaSzVfZircnOEoANdsylCskNsgQcvJNMqfk'
 )
@@ -41,24 +41,22 @@ def get_twitter_token():
     """
     user = g.user
     if user is not None:
-        return user.oauth_token, user.oauth_secret
+        return user.twitter_oauth_token, user.twitter_oauth_secret
  
 @views.before_request
 def before_request():
     g.user = None
     if 'user_id' in session:
         g.user = models.User.get_by_key_name(session['user_id'])
-        pass
 
 @views.after_request
 def after_request(response):
     return response
 
-
 @views.route('/')
 def index():
     """Render website's index page."""
-    return render_template('TopPage.html')
+    return render_template('TopPage.html', p = {'usr': g.user})
 
 @views.route('/mobile')
 def mobile():
@@ -104,7 +102,8 @@ def oauth_authorized(resp):
         flash(u'You denied the request to sign in.')
         return redirect(next_url)
 
-    user = models.User.get_by_key_name(resp['screen_name'])
+    #user = models.User.get_by_key_name(resp['screen_name'])
+    user = models.User.get_by_key_name(resp['oauth_token'])
 
 
     # user never signed on
@@ -118,6 +117,8 @@ def oauth_authorized(resp):
     # new tokens here.
     user.twitter_oauth_token = resp['oauth_token']
     user.twitter_oauth_secret = resp['oauth_token_secret']
+    #user.screen_name = resp['screen_name']
+    #user.user_name = resp['user_name']
     user.put()
 
     session['user_id'] = resp['oauth_token']
@@ -128,3 +129,5 @@ def oauth_authorized(resp):
 def page_not_found(error):
     """Custom 404 page."""
     return render_template('404.html'), 404
+
+
