@@ -27,6 +27,11 @@ class User(db.Model):
     #TOKEN_LENGTH = 20
     twitter_oauth_token = db.StringProperty()
     twitter_oauth_secret = db.StringProperty()
+    # 発言者のスクリーンネーム
+    screen_name = db.StringProperty()
+    # 発言者のユーザ名
+    user_name = db.StringProperty()
+
 
 
 class Reporter(db.Model):

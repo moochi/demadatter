@@ -7,14 +7,13 @@
 
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css" />
     <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
-    <script src="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js"></script>
 
   </head>
   <body>
-    <div data-role="page"> 
         <h1 style="text-align:center">デマだったーTOP</h1>
         <center>
-        <a href="/mobile">モバイル版 トップページ(要twitter認証)</a>
+        <a href="/mobile">モバイル版 トップページ(要twitter認証)</a><br>
+
         </center>
 <hr>
     デマ投稿Form<br />
@@ -25,8 +24,13 @@
     <input type="button" value="確認" onclick="location.href = '/v2/api/post?reporter_id='+this.form.reporter_id.value+'&tweet_id='+this.form.tweet_id.value+'&flag='+this.form.flag.value;" /><br />
     <hr>
 
+    <div data-role="page"> 
     </div>
 <!-- /page --> 
+
+
+        <a href="/login">ログイン</a><br>
+        <a href="/logout">ログアウト</a>
 
 
 
