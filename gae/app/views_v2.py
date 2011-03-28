@@ -43,7 +43,7 @@ def dema_add():
     user_obj = get_user(reporter_id)  # レポートする人のUserObject
     tweet_obj = save_create_twit(
                  tweet_id   = tweet_id, 
-                 tweet      = '', #tweet.decode('utf-8'), 
+                 tweet      = tweet, 
                  user       = user_obj, 
                  tweeted_at = twit_data['created_at']
                  )
