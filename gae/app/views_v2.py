@@ -117,7 +117,7 @@ def show_tweet(tweet_id):
     if tweet is None:
         return json.dumps({ "status": "ng", "text": "Not Found"})
     ret = tweet_to_obj(tweet)
-    ret["status"] = "success"
+    ret["status"] = "ok"
     return json.dumps(ret)
 
 

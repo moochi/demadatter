@@ -8,13 +8,15 @@
     <script type="text/javascript">
     $(function(){
       $("#btn_post_report").click(function(){ report_dema_post() });
-      $("#btn_update_rank").click(function(){ update_rank('date') });
+      $("#btn_update_rank").click(function(){ 
+        $("#disp_rank").html('');
+        update_rank('date') 
+      });
 
       update_rank('date');
     });
 
     function update_rank(type){
-      <!--var req_url = '/v2/api/ranking?type='+type;-->
       SNBinder.get_named_sections("/static/tmpl/tmpl_top-page.html",  '',
       function(templates) {
           var req_url = '/v2/api/ranking?type='+type;
@@ -28,19 +30,6 @@
           });
     };
 
-
-    function update_rank_simple(type){
-      console.info('update rank now');
-      var req_url = '/v2/api/ranking?type='+type;
-      $.ajax({
-        url: req_url, 
-        success: function(data) {
-          console.info(data);
-          $("#disp_rank").html('');
-          $('#disp_rank').html(data);
-        }
-      });
-    }
 
     function report_dema_post(){
       console.info('report_dema_post');
