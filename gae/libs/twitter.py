@@ -2,6 +2,7 @@
 
 from google.appengine.api import urlfetch
 from django.utils import simplejson as json
+import logging
 
 def get_status_by_tweet_id(tweet_id):
     """ tweet_id から中身を取得。
@@ -29,6 +30,16 @@ def get_status_by_tweet_id(tweet_id):
     url = "http://api.twitter.com/1/statuses/show/%d.json" % tweet_id
     response = urlfetch.fetch(url)
     if response.content is not None:
+        data = json.loads(response.content)
+        if data.has_key('text'):
+          logging.info(data['text'])
+        else:
+          logging.info('data has no text elements')
         return json.loads(response.content)
 
     return None
+
+if __name__ == '__main__':
+  sample_tweet_id = 53390888138846208
+  print get_status_by_tweet_id(sample_tweet_id)
+
