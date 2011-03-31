@@ -124,8 +124,8 @@ def oauth_authorized(resp):
     # new tokens here.
     user.twitter_oauth_token = resp['oauth_token']
     user.twitter_oauth_secret = resp['oauth_token_secret']
-    #user.screen_name = resp['screen_name']
-    #user.user_name = resp['user_name']
+    user.screen_name = resp['screen_name']
+    user.twitter_user_id = resp['user_id']
     user.put()
 
     session['user_id'] = resp['oauth_token']
