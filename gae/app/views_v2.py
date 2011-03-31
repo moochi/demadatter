@@ -16,7 +16,7 @@ import os, sys, codecs
 root_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(root_dir, 'lib'))
 
-from flask import Module,  render_template, session, g
+from flask import Module,  render_template, session, g, redirect
 from flask import make_response, Response
 from flask import request
 from flask import json
