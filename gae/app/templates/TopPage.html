@@ -6,12 +6,34 @@
     <meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1.0,maximum-scale=3.0" />
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css" />
     <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
+    <script type="text/javascript">
+    $(function(){
+      $("#btn_post_report").click(function(){ report_dema_post() });
+    });
+
+    function report_dema_post(){
+      console.info('report_dema_post');
+      var tweet_id = $('#tweet_id').val();
+      var flag = $('#flag').val();
+      var api_url='/v2/api/post?';
+      var req_url=''+api_url+'tweet_id='+tweet_id+'&flag='+flag;
+      console.info(req_url);
+      $.getJSON(
+          req_url,
+          null,
+          function(data){ console.info(data) }
+          )
+      console.info('finish post');
+    };
+ 
+    
+    </script>
   </head>
   <body>
 
   <h1 style="text-align:center">デマだったーTOP</h1>
   <center>
-  <a href="/mobile">モバイル版 トップページ(要Login)</a><br>
+  <a href="/mobile">モバイル版 トップページ (要Login)</a><br>
 
 {% if p.usr %}
 {{ p.user }}
@@ -19,10 +41,9 @@
 
     デマ投稿Form<br />
     <form action="/v2/post" method="get">
-    reporter_id : <input name="reporter_id" /><br />
-    Tweet_id : <input name="tweet_id" value="" /><br />
-    Flag : <input name="flag" value="1" /><br />
-    <input type="button" value="確認" onclick="location.href = '/v2/api/post?reporter_id='+this.form.reporter_id.value+'&tweet_id='+this.form.tweet_id.value+'&flag='+this.form.flag.value;" /><br />
+    Tweet_id : <input name="tweet_id" value="" id='tweet_id'/><br />
+    Flag : <input name="flag" value="1" id='flag'/><br />
+    <input type="button" value="確認" id='btn_post_report'/><br />
     <hr>
 
     <div data-role="page"> 
