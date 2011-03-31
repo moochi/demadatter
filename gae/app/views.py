@@ -8,9 +8,8 @@ application.
 from flask import Module, url_for, render_template, request, redirect,\
                   session, g, flash
 from flaskext.oauth import OAuth
-#from models import *
 import models
-#from forms import TodoForm
+from forms import TodoForm
 
 views = Module(__name__, 'views')
 oauth = OAuth()
@@ -24,8 +23,8 @@ twitter = oauth.remote_app('twitter',
     # they mostly work the same, but for sign on /authenticate is
     # expected because this will give the user a slightly different
     # user interface on the twitter side.
-    authorize_url='http://api.twitter.com/oauth/authenticate',
-    #authorize_url='https://api.twitter.com/oauth/authorize',
+    #authorize_url='http://api.twitter.com/oauth/authenticate',
+    authorize_url='https://api.twitter.com/oauth/authorize',
     consumer_key='qbAWqQcTBtOxPqbTh5Uag',
     consumer_secret='TdKlsHpqaSzVfZircnOEoANdsylCskNsgQcvJNMqfk'
 )
@@ -41,7 +40,7 @@ def get_twitter_token():
     """
     user = g.user
     if user is not None:
-        return user.twitter_oauth_token, user.twitter_oauth_secret
+        return user.oauth_token, user.oauth_secret
  
 @views.before_request
 def before_request():
@@ -65,13 +64,13 @@ def mobile():
     return redirect('/static/v2/top.html')
 
 @views.route('/login')
-def login():
+def login(next=''):
     """Calling into authorize will cause the OpenID auth machinery to kick
     in.  When all worked out as expected, the remote application will
     redirect back to the callback URL provided.
     """
-    return twitter.authorize(callback=url_for('oauth_authorized',
-        next=request.args.get('next') or request.referrer or None))
+    resp=request.args.get('next') or request.referrer or None
+    return twitter.authorize(callback=url_for('oauth_authorized', next=resp))
 
 
 @views.route('/logout')
@@ -79,6 +78,14 @@ def logout():
     session.pop('user_id', None)
     flash('You were signed out')
     return redirect(request.referrer or url_for('index'))
+
+
+#@views.route('/setting')
+#def setting():
+    #if g.user is None:
+        #return redirect(url_for('login', next=request.url)) 
+    #return render_template('TopPage.html', p = {'usr': g.user})
+    ##return render_template('TopPage.html', p = {'usr': g.user})
 
 
 @views.route('/oauth-authorized')

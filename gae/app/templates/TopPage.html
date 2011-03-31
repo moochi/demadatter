@@ -3,13 +3,44 @@
   <head>
     <meta charset="utf-8" />
     <title>demadattar</title>
-    <meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1.0,maximum-scale=3.0" />
-    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css" />
     <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
+    <script src="/js/libs/snbinder-0.5.3.js"></script>
     <script type="text/javascript">
     $(function(){
       $("#btn_post_report").click(function(){ report_dema_post() });
+      $("#btn_update_rank").click(function(){ update_rank('date') });
+
+      update_rank('date');
     });
+
+    function update_rank(type){
+      <!--var req_url = '/v2/api/ranking?type='+type;-->
+      SNBinder.get_named_sections("/static/tmpl/tmpl_top-page.html",  '',
+      function(templates) {
+          var req_url = '/v2/api/ranking?type='+type;
+          console.info(templates);
+          SNBinder.get(req_url,  '',  true,  
+            function(json) {
+              $.each(json.tweets, function(i, val){;
+                $('#disp_rank').append(SNBinder.bind(templates.ranking, val));
+              });
+            });
+          });
+    };
+
+
+    function update_rank_simple(type){
+      console.info('update rank now');
+      var req_url = '/v2/api/ranking?type='+type;
+      $.ajax({
+        url: req_url, 
+        success: function(data) {
+          console.info(data);
+          $("#disp_rank").html('');
+          $('#disp_rank').html(data);
+        }
+      });
+    }
 
     function report_dema_post(){
       console.info('report_dema_post');
@@ -40,17 +71,15 @@
 <a href="/logout">ログアウト</a><p>
 
     デマ投稿Form<br />
-    <form action="/v2/post" method="get">
     Tweet_id : <input name="tweet_id" value="" id='tweet_id'/><br />
     Flag : <input name="flag" value="1" id='flag'/><br />
-    <input type="button" value="確認" id='btn_post_report'/><br />
+    <button id='btn_post_report'>登録</button>
     <hr>
 
-    <div data-role="page"> 
-    </div>
+  <button id='btn_update_rank'>ランキング更新</button>
+  <div id='disp_rank'></div>
 
   </center>
-
 {% endif %}
 {% if not p.usr %}
 {{ p.user }}
