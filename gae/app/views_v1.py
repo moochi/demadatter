@@ -29,9 +29,9 @@ views_v1 = Module(__name__)
 
 logging.getLogger().setLevel(logging.DEBUG)
 
-@views_v1.route('/api/', methods=['GET', 'POST'])
+@views_v1.route('/')
 def dema_ranking():
-    return redirect('/v2/ranking')
+    return redirect('/static/v2/recently.html')
 
 @views_v1.route('/api/count', methods=['GET', 'POST'])
 def dema_count():
