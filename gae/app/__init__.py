@@ -20,6 +20,7 @@ from flask import Flask
 from flask import Flask, session, g, flash
 from views import views
 from views_v2 import views_v2
+from views_v1 import views_v1
 import settings
 
 
@@ -33,6 +34,7 @@ def create_app():
     app.config.from_object(settings)
     app.register_module(views)
     app.register_module(views_v2, url_prefix='/v2')
+    app.register_module(views_v1, url_prefix='/v1')
     return app
 
 if __name__ == '__main__':
