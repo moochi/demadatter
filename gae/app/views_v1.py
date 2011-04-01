@@ -17,26 +17,25 @@ root_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(root_dir, 'lib'))
 
 import logging
-import random
+import random, string
 from flask import Module,  render_template
 from flask import make_response, Response
 from flask import request
 from flask import json
 from flask import redirect
 import logging
-from twitter import get_status_by_tweet_id
 import models
 views_v1 = Module(__name__)
 
 logging.getLogger().setLevel(logging.DEBUG)
 
-@views_v1.route('/', methods=['GET', 'POST'])
+@views_v1.route('/api/', methods=['GET', 'POST'])
 def dema_ranking():
     return redirect('/v2/ranking')
 
-@views_v1.route('/count', methods=['GET', 'POST'])
+@views_v1.route('/api/count', methods=['GET', 'POST'])
 def dema_count():
-    token	= getToken(request.args.get('token'))
+    token = getToken(request.args.get('token'))
     tweetid = request.args.get('tweetid')
     result = ['token=%s' % token]
     tweet = get_twit(tweetid)
