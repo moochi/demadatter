@@ -1,0 +1,24 @@
+
+{%}ranking{%}
+<hr>
+<div class='one_report'>
+<img src='http://api.twitter.com/1/users/profile_image/$(.user.screen_name).xml?size=normal'>
+<div class='tweet_text'>$(.text)</div>
+<div class='tweet_d_score'>$(.dema_score)</div>
+<div class='tweet_d_count'>$(.dema_count)</div>
+<div class='tweet_d_non_count'>$(.non_dema_count)</div>
+<div class='tweet_user'>
+</div>
+</div>
+
+Twitter_id：$(.tweet_id)<br>
+{%}tweets_sample{%}
+"non_dema_count": 0,
+"dema_score": 1.0, 
+"dema_count": 2, 
+"tweet_id": 53486560733184000, 
+"user": {
+  "id": 1,
+  "name": "nitoyon",
+  "screen_name": "nitoyon"},
+"text": "\u4eca\u5e74\u306f\u30b5\u30fc\u30d0\u30fc\u30b5\u30a4\u30c9JavaScript\u304c\u6d41\u884c\u308a\u307e\u3059!!!"

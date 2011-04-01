@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demadattar</title>
+    <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
+    <script src="/js/libs/snbinder-0.5.3.js"></script>
+    <script type="text/javascript">
+    $(function(){
+      $("#btn_post_report").click(function(){ report_dema_post() });
+      $("#btn_update_rank").click(function(){ 
+        $("#disp_rank").html('');
+        update_rank('date') 
+      });
+
+      update_rank('date');
+    });
+
+    function update_rank(type){
+      SNBinder.get_named_sections("/static/tmpl/tmpl_top-page.html",  '',
+      function(templates) {
+          var req_url = '/v2/api/ranking?type='+type;
+          console.info(templates);
+          SNBinder.get(req_url,  '',  true,  
+            function(json) {
+              $.each(json.tweets, function(i, val){;
+                $('#disp_rank').append(SNBinder.bind(templates.ranking, val));
+              });
+            });
+          });
+    };
+
+
+    function report_dema_post(){
+      console.info('report_dema_post');
+      var tweet_id = $('#tweet_id').val();
+      var flag = $('#flag').val();
+      var api_url='/v2/api/post?';
+      var req_url=''+api_url+'tweet_id='+tweet_id+'&flag='+flag;
+      console.info(req_url);
+      $.getJSON(
+          req_url,
+          null,
+          function(data){ console.info(data) }
+          )
+      console.info('finish post');
+    };
+ 
+    
+    </script>
+  </head>
+  <body>
+
+  <h1 style="text-align:center">デマだったーTOP</h1>
+  <center>
+  <a href="/mobile">モバイル版 トップページ (要Login)</a><br>
+
+{% if p.usr %}
+<a href="/logout">ログアウト</a> {{ p.usr.screen_name }} <p>
+
+    デマ投稿Form<br />
+    Tweet_id : <input name="tweet_id" value="" id='tweet_id'/><br />
+    Flag : <input name="flag" value="1" id='flag'/><br />
+    <button id='btn_post_report'>登録</button>
+    <hr>
+
+  <button id='btn_update_rank'>ランキング更新</button>
+  <div id='disp_rank'></div>
+
+  </center>
+{% endif %}
+{% if not p.usr %}
+{{ p.user }}
+<a href="/login">ログイン</a><br>
+{% endif %}
+
+
+
+
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+
+
+
+  </body>
+</html>
+                
