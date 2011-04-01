@@ -1,0 +1,72 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<title>Page Title</title> 
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css" />
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.3.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js"></script>
+	<META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=UTF-8">
+</head> 
+<body> 
+
+<div data-role="page" id="show_entry">
+
+	<div data-role="header">
+		<h1>エントリ検索</h1>
+	</div>
+
+	<div data-role="content">	
+		<div data-role="fieldcontain">
+		    <label for="t_id">Twitter ID:</label>
+		    <input type="text" name="t_id" id="twitter_id" value=""  />
+		</div>	
+		<input type="button" value="search" id="search_btn">
+		
+		<hr>
+		
+		<ul data-role="listview" id="list" style="padding-top:20px; padding-bottom:20px;">
+		</ul>
+	</div>
+
+<script type="text/javascript">
+$(function(){
+	$('#search_btn').click(function(){
+		var tId = $('#twitter_id').val();
+		if (!tId) {
+			alert("twitter IDを指定してください。");
+			return;
+		}
+		
+		// search API call
+		
+		var callback = function(result){
+			if ( result.status != "success" ) {
+				alert("通信エラーが発生したか、指定されたtwitter IDが存在しませんでした。");
+				return;
+			}
+			
+			var li = $('<li></li>').append($('<h2></h2>').text(result.tweet_id + ": " + result.text).
+									append($('<p></p>').text(result.user.name + "(" + result.user.screen_name +")")).
+									append($('<h2 style="color: red;"></h2>').text("デマ：" + result.dema_count)).
+									append($('<h2 style="color: blue;"></h2>').text("デマじゃない：" + result.non_dema_count))
+			);
+			
+			var ul = $('#list');
+			ul.empty();	// 今の子要素を削除し、
+			ul.append(li);	// 検索結果を追加
+
+			ul.listview('refresh');	// 最後に更新
+		};
+		
+		// API call
+		$.getJSON('/v2/api/entry',
+				{tweet_id : tId},
+				callback);
+	});
+});
+</script>
+
+</div>
+
+</body>
+</html>

@@ -59,8 +59,6 @@ def index():
 
 @views.route('/mobile')
 def mobile():
-    if g.user is None:
-        return redirect(url_for('login', next=request.url)) 
     return redirect('/static/v2/top.html')
 
 @views.route('/login')
