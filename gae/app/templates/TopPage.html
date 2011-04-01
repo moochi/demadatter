@@ -56,8 +56,7 @@
   <a href="/mobile">モバイル版 トップページ (要Login)</a><br>
 
 {% if p.usr %}
-{{ p.user }}
-<a href="/logout">ログアウト</a><p>
+<a href="/logout">ログアウト</a> {{ p.usr.screen_name }} <p>
 
     デマ投稿Form<br />
     Tweet_id : <input name="tweet_id" value="" id='tweet_id'/><br />

@@ -170,7 +170,7 @@ def tweet_to_obj(tweet):
            }    
 
 #######  Utility
-def save_create_twit(tweet_id, tweet, user,tweeted_at):
+def save_create_twit(tweet_id, tweet, user, tweeted_at):
     u"""
     tweet_id : Tweet ID
     tweet : Tweet 本文
