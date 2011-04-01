@@ -3,7 +3,7 @@
 	デマだったー
 		チームこれから
 */
-package to.tes.demadatter;
+package jp.demadatter;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -21,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -38,27 +39,33 @@ public class MainActivity
 	/** twiccaツイート表示プラグインExtra:ツイート日時 */
 	private static final String EXTRA_CREATED = "created_at";
 
-	/** 通報済みレポート設定キー */
+	/** ユーザトークン設定キー */
+	private static final String PREF_TOKEN = "token";
+	/** レポート済みレポート設定キー */
 	private static final String PREF_REPORT_TWEET = "reportid";
-	/** 通報済みレポート区切り文字 */
+	/** レポート済みレポート区切り文字 */
 	private static final String REPORT_DELIMITER = ",";
-	/** 通報済みレポート保存数 */
+	/** レポート済みレポート保存数 */
 	private static final int SAVE_REPORT_COUNT = 10;
 
 	/** ハンドラ */
 	private Handler mHandler = new MainHandler();
 	/** メッセージ:デマ件数取得 */
 	private static final int MSG_GETCOUNT = 1;
-	/** メッセージ:デマ通報 */
-	private static final int MSG_NOTIFYDEMA = 2;
+	/** メッセージ:レポート */
+	private static final int MSG_REPORTED = 2;
 
 	/** プログレスダイアログ */
 	private ProgressDialog mProgress;
 
+	/** ユーザトークン(デマだったーのトークンキー) */
+	private String mToken;
 	/** ツイート本文 */
 	private String mTweet;
 	/** スクリーン名 */
 	private String mScreenName;
+	/** ユーザー名 */
+	private String mUserName;
 	/** ツイートID */
 	private String mTweetID;
 	/** ツイート日時 */
@@ -75,10 +82,15 @@ public class MainActivity
 		requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 
+		// ユーザートークン ※Twitter APIのトークンではない
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		mToken = pref.getString(PREF_TOKEN, "");
+
 		// ツイート情報取得
 		Intent intent = getIntent();
 		mTweet = intent.getStringExtra(Intent.EXTRA_TEXT);
 		mScreenName = intent.getStringExtra(EXTRA_SCREEN_NAME);
+		mUserName = intent.getStringExtra(EXTRA_USER_NAME);
 		mTweetID = intent.getStringExtra(EXTRA_TWEET_ID);
 		mCreatedAt = intent.getStringExtra(EXTRA_CREATED);
 		Date date = new Date(Long.parseLong(mCreatedAt));
@@ -89,7 +101,7 @@ public class MainActivity
 
 		// ツイート情報表示
 		setViewText(R.id.main_name_text, "@" + mScreenName);
-		setViewText(R.id.main_user_text, intent.getStringExtra(EXTRA_USER_NAME));
+		setViewText(R.id.main_user_text, mUserName);
 		setViewText(R.id.main_tweet_text, mTweet);
 		setViewText(R.id.main_date_text, 
 					DateFormat.getDateFormat(this).format(date) + " " +
@@ -155,11 +167,11 @@ public class MainActivity
 	}
 
 	/**
-	 * デマ通報要求
+	 * レポート要求
 	 */
 	private void onClickReport() {
 		if (idReportTweet(mTweetID)) {
-			// 通報済み
+			// レポート済み
 			new AlertDialog.Builder(this)
 				.setMessage(R.string.already_report)
 				.setPositiveButton(R.string.report_result_ok, new DialogInterface.OnClickListener() {
@@ -178,32 +190,34 @@ public class MainActivity
 		mProgress = ProgressDialog.show(this, null, getResources().getString(R.string.reporting));
 
 		// 通信リクエスト
-		final String url = "http://voogie01.sakura.ne.jp/demadatter/api/add.cgi";
-		final Message msg = mHandler.obtainMessage(MSG_NOTIFYDEMA);
-		//DemaServerConnecter.notifyDema(mTweetID, mTweet, mScreenName, mCreatedAt, msg);
-
-		// !!! for test
+		final String url = getResources().getString(R.string.report_url);
+		final Message msg = mHandler.obtainMessage(MSG_REPORTED);
 		new Thread(new Runnable() {
 				@Override
 				public void run() {
 					try {
-						String params = "id=" + URLEncoder.encode(mTweetID, "UTF-8")
-							+ "&text=" + URLEncoder.encode(mTweet, "UTF-8")
-							+ "&user_screen_name=" + URLEncoder.encode(mScreenName, "UTF-8")
+						String params = "tweetid=" + URLEncoder.encode(mTweetID, "UTF-8")
+							+ "&tweet=" + URLEncoder.encode(mTweet, "UTF-8")
+							+ "&screen_name=" + URLEncoder.encode(mScreenName, "UTF-8")
 							+ "&created_at=" + URLEncoder.encode(mCreatedAt, "UTF-8");
-android.util.Log.d("debug", "send param:" + params);
+						if (mUserName != null) {
+							params += "&user_name=" + URLEncoder.encode(mUserName, "UTF-8");
+						}
+						if ((mToken != null) && (mToken.length() > 0)) {
+							params += "&token=" + mToken;
+						}
 
 						HttpURLConnection http = (HttpURLConnection)new URL(url).openConnection();
 						http.setRequestMethod("POST");
 						http.setDoOutput(true);
 						http.getOutputStream().write(params.getBytes());
-						byte b[] = new byte[http.getContentLength()];
-						http.getInputStream().read(b);
+						byte data[] = new byte[1024];	// GAEは Content-Length が返せない
+						int size = http.getInputStream().read(data);
 						http.disconnect();
-						msg.arg1 = Integer.parseInt(new String(b));
+						msg.obj = new String(data, 0, size);
 					} catch (Exception e) {
 						android.util.Log.e("debug", "onClickReport():" + e.toString());
-						msg.arg1 = 0;	// エラー
+						msg.obj = null;	// エラー
 					}
 					msg.sendToTarget();
 				}
@@ -211,15 +225,16 @@ android.util.Log.d("debug", "send param:" + params);
 	}
 
 	/**
-	 * デマ件数取得要求x
+	 * デマ件数取得要求
 	 */
 	private void getDemaCount() {
 		// 通信リクエスト
-		final String url = "http://voogie01.sakura.ne.jp/demadatter/api/count.cgi?id=" + mTweetID;
+		String params = "?tweetid=" + mTweetID;
+		if ((mToken != null) && (mToken.length() > 0)) {
+			params += "&token=" + mToken;
+		}
+		final String url = getResources().getString(R.string.count_url) + params;
 		final Message msg = mHandler.obtainMessage(MSG_GETCOUNT);
-		//DemaServerConnectergg.getDemaCount(mTweetID, msg);
-
-		// !!! for test
 		new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -227,13 +242,13 @@ android.util.Log.d("debug", "send param:" + params);
 						HttpURLConnection http = (HttpURLConnection)new URL(url).openConnection();
 						http.setRequestMethod("GET");
 						http.connect();
-						byte b[] = new byte[http.getContentLength()];
-						http.getInputStream().read(b);
+						byte data[] = new byte[1024];	// GAEは Content-Length が返せない
+						int size = http.getInputStream().read(data);
 						http.disconnect();
-						msg.arg1 = Integer.parseInt(new String(b));
+						msg.obj = new String(data, 0, size);
 					} catch (Exception e) {
 						android.util.Log.e("debug", "getDemoCount():" + e.toString());
-						msg.arg1 = -1;	// エラー
+						msg.obj = null;	// エラー
 					}
 					msg.sendToTarget();
 				}
@@ -242,15 +257,23 @@ android.util.Log.d("debug", "send param:" + params);
 
 	/**
 	 * デマ件数取得結果
-	 * @param	count	件数
+	 * @param	msg	メッセージ
 	 */
-	private void onMsgGetCount(int count) {
+	private void onMsgGetCount(Message msg) {
+		if ((msg.obj == null) || !(msg.obj instanceof String)) {
+			// 通信失敗?
+			showPopup(R.string.report_failure);
+			return;
+		}
+		HashMap<String,Integer> map = parseResult((String)msg.obj);
+
 		String message;
+		int count = map.get(mTweetID);
 		if (count > 0) {
 			// デマ件数表示
 			message = String.format(getResources().getString(R.string.count_format), count);
 		} else {
-			// デマ通報されていない
+			// レポートされていない
 			message = getResources().getString(R.string.no_report);
 		}
 		setViewText(R.id.main_count_text, message);
@@ -258,64 +281,89 @@ android.util.Log.d("debug", "send param:" + params);
 	}
 
 	/**
-	 * デマ通報結果
-	 * @param	count	件数
+	 * レポート結果
+	 * @param	msg	メッセージ
 	 */
-	private void onMsgNotifyDema(int count) {
+	private void onMsgReported(Message msg) {
 		// プログレス表示を消す
 		if (mProgress != null) {
 			mProgress.dismiss();
 			mProgress = null;
 		}
 
-		int result = R.string.report_failure;
-		if (count > 0) {
-			// 成功したらツイートIDを記録しておく
-			saveReportTweet(mTweetID);
-			// デマ件数更新
-			onMsgGetCount(count);
-			result = R.string.report_success;
+		if ((msg.obj == null) || !(msg.obj instanceof String)) {
+			// 通信失敗
+			showPopup(R.string.report_failure);
+			return;
 		}
 
+		int count = parseResult((String)msg.obj).get(mTweetID);
+		// 成功したらツイートIDを記録しておく
+		saveReportTweet(mTweetID);
+		// デマ件数更新
+		onMsgGetCount(msg);
+
 		// 結果表示
-		new AlertDialog.Builder(this)
-			.setMessage(result)
-			.setPositiveButton(R.string.report_result_ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-					}
-				})
-			.show();
+		showPopup(R.string.report_success);
 	}
 
 	/**
-	 * ツイートをデモ通報済みか判定
+	 * 通信応答解析
+	 * @param	result	通信結果
+	 * @return	通信結果のツイートIDマップ
+	 */
+	private HashMap<String,Integer> parseResult(String result) {
+		String lines[] = result.split("\n");
+		HashMap<String,Integer> map = new HashMap<String,Integer>();
+
+		for (int index = 0; index < lines.length; index++) {
+			String words[] = lines[index].split("=", 2);
+			if (words.length < 2) {
+				continue;
+			}
+			if (words[0].equals("token")) {
+				// トークン更新
+				mToken = words[1];
+				SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+				SharedPreferences.Editor editor = pref.edit();
+				editor.putString(PREF_TOKEN, mToken);
+				editor.commit();
+			} else {
+				// ツイートID : 件数 マップ
+				map.put(words[0], Integer.parseInt(words[1]));
+			}
+		}
+		return map;
+	}
+
+	/**
+	 * ツイートをレポート済みか判定
 	 * @param	id	ツイートID
-	 * @return	通報済み状態
+	 * @return	レポート済み状態
 	 */
 	private boolean idReportTweet(String id) {
-		// 通報済みツイート走査
+		// レポート済みツイート走査
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		String report[] = pref.getString(PREF_REPORT_TWEET, "").split(REPORT_DELIMITER);
 		for (int index = 0; index < report.length; index++) {
 			if (id.equals(report[index])) {
-				// 通報済み
+				// レポート済み
 				return true;
 			}
 		}
-		// 通報してないよ
+		// レポートしてないよ
 		return false;
 	}
 
 	/**
-	 * デモ通報したツイートを保存
+	 * レポートしたツイートを保存
 	 * @param	id	ツイートID
 	 */
 	private void saveReportTweet(String id) {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		String report[] = pref.getString(PREF_REPORT_TWEET, "").split(REPORT_DELIMITER);
 
-		// 新しい通報済みレポートリスト
+		// 新しいレポート済みIDリスト
 		String save;
 		save = id;
 		for (int index = 0, count = 1; (index < report.length) && (count < SAVE_REPORT_COUNT); index++, count++) {
@@ -337,14 +385,28 @@ android.util.Log.d("debug", "send param:" + params);
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case MSG_GETCOUNT:			// デマ件数取得
-				onMsgGetCount(msg.arg1);
+				onMsgGetCount(msg);
 				break;
 
-			case MSG_NOTIFYDEMA:		// デマ通報
-				onMsgNotifyDema(msg.arg1);
+			case MSG_REPORTED:			// レポート
+				onMsgReported(msg);
 				break;
 			}
 		}
+	}
+
+	/**
+	 * 失敗アラート表示
+	 * @param	resid	リソースID
+	 */
+	private void showPopup(int resid) {
+		final AlertDialog dialog = new AlertDialog.Builder(this).setMessage(resid).show();
+		mHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					dialog.dismiss();
+				}
+			}, 3000/*ms*/);
 	}
 
 	/**

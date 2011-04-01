@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">デマだったー</string>
+
   <string name="ranking_btn">ランキング</string>
   <string name="counting">確認中...</string>
   <string name="no_report">このツイートはまだデマ報告されていません</string>
   <string name="count_format">このツイートは%1$d人がデマだと言っています</string>
-  <string name="ranking_url">http://voogie01.sakura.ne.jp/demadatter/</string>
-  <string name="already_report">すでにデモ通報済みです</string>
-  <string name="reporting">通報中...</string>
-  <string name="report_success">デモ通報しました</string>
+  <string name="already_report">すでにレポート済みです</string>
+  <string name="reporting">レポート中...</string>
+  <string name="report_success">レポートしました</string>
   <string name="report_failure">おや?何かおかしいようです</string>
   <string name="report_result_ok">OK</string>
-  <string name="tweet_url">http://twitter.com/home?status=</string>
-  <string name="dt_format">DT @%1$s: %2$s</string>
 </resources>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-		  package="to.tes.demadatter"
-		  android:versionCode="1"
-		  android:versionName="1.0">
+		  package="jp.demadatter"
+		  android:versionCode="2"
+		  android:versionName="1.0b">
 
   <application
 	 android:label="@string/app_name"
-	 android:icon="@drawable/dt_btn"
+	 android:icon="@drawable/icon"
 	 >
 	<activity
 	   android:name="MainActivity"
