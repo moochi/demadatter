@@ -8,9 +8,8 @@ application.
 from flask import Module, url_for, render_template, request, redirect,\
                   session, g, flash
 from flaskext.oauth import OAuth
-#from models import *
 import models
-#from forms import TodoForm
+from forms import TodoForm
 
 views = Module(__name__, 'views')
 oauth = OAuth()
@@ -48,17 +47,15 @@ def before_request():
     g.user = None
     if 'user_id' in session:
         g.user = models.User.get_by_key_name(session['user_id'])
-        pass
 
 @views.after_request
 def after_request(response):
     return response
 
-
 @views.route('/')
 def index():
     """Render website's index page."""
-    return render_template('TopPage.html')
+    return render_template('TopPage.html', p = {'usr': g.user})
 
 @views.route('/mobile')
 def mobile():
@@ -67,13 +64,13 @@ def mobile():
     return redirect('/static/v2/top.html')
 
 @views.route('/login')
-def login():
+def login(next=''):
     """Calling into authorize will cause the OpenID auth machinery to kick
     in.  When all worked out as expected, the remote application will
     redirect back to the callback URL provided.
     """
-    return twitter.authorize(callback=url_for('oauth_authorized',
-        next=request.args.get('next') or request.referrer or None))
+    resp=request.args.get('next') or request.referrer or None
+    return twitter.authorize(callback=url_for('oauth_authorized', next=resp))
 
 
 @views.route('/logout')
@@ -81,6 +78,14 @@ def logout():
     session.pop('user_id', None)
     flash('You were signed out')
     return redirect(request.referrer or url_for('index'))
+
+
+#@views.route('/setting')
+#def setting():
+    #if g.user is None:
+        #return redirect(url_for('login', next=request.url)) 
+    #return render_template('TopPage.html', p = {'usr': g.user})
+    ##return render_template('TopPage.html', p = {'usr': g.user})
 
 
 @views.route('/oauth-authorized')
@@ -104,7 +109,8 @@ def oauth_authorized(resp):
         flash(u'You denied the request to sign in.')
         return redirect(next_url)
 
-    user = models.User.get_by_key_name(resp['screen_name'])
+    #user = models.User.get_by_key_name(resp['screen_name'])
+    user = models.User.get_by_key_name(resp['oauth_token'])
 
 
     # user never signed on
@@ -118,6 +124,8 @@ def oauth_authorized(resp):
     # new tokens here.
     user.twitter_oauth_token = resp['oauth_token']
     user.twitter_oauth_secret = resp['oauth_token_secret']
+    user.screen_name = resp['screen_name']
+    user.twitter_user_id = resp['user_id']
     user.put()
 
     session['user_id'] = resp['oauth_token']
@@ -128,3 +136,5 @@ def oauth_authorized(resp):
 def page_not_found(error):
     """Custom 404 page."""
     return render_template('404.html'), 404
+
+

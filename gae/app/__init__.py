@@ -17,6 +17,7 @@ This file creates your application.
 #find_gae_sdk('../libs')
 
 from flask import Flask
+from flask import Flask, session, g, flash
 from views import views
 from views_v2 import views_v2
 from views_v1 import views_v1

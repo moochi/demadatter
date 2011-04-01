@@ -16,75 +16,87 @@ import os, sys, codecs
 root_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(root_dir, 'lib'))
 
-from flask import Module,  render_template, session
+from flask import Module,  render_template, session, g, redirect
 from flask import make_response, Response
 from flask import request
 from flask import json
-import logging
 from twitter import get_status_by_tweet_id
 import models
 views_v2 = Module(__name__)
 
+@views_v2.before_request
+def before_request():
+    g.user = None
+    if 'user_id' in session:
+        g.user = models.User.get_by_key_name(session['user_id'])
+
+@views_v2.after_request
+def after_request(response):
+    return response
+
 """デマレポート処理"""
 @views_v2.route('/api/post', methods=['GET', 'POST'])
 def dema_add():
-    tweet_id = int(request.args.get('tweet_id'))
-    #reporter_id = str(request.args.get('reporter_id'))
+    ## ログインチェック
+    if g.user is None:
+        return redirect(url_for('login', next=request.url)) 
     reporter_id = session['user_id']
-    #reporter_id  = '1'  # todo: OAuthでトークン実装するまでのつなぎ
-    flag = int(request.args.get('flag'))
-    
+    flag = request.args.get('flag', type=int)
+    tweet_id = request.args.get('tweet_id', type=int)
+   
+    ## Userオブジェクト作成
+    user_obj = get_user(reporter_id)  # レポートする人のUserObject
 
+    ## tweet obj作成
     twit_data =  get_status_by_tweet_id(tweet_id)
 
-    ## Tweetを作る
-    tweet = twit_data[u'text']  # twit の本文
+    if twit_data.has_key('text'):
+      tweet_test = twit_data['text']
+      tweet_obj = save_create_twit(
+                   user       = user_obj, 
+                   tweet_id   = tweet_id, 
+                   tweet      = u"%s"%twit_data['text'], 
+                   tweeted_at = twit_data['created_at']
+                   )
 
-    user_obj = get_user(reporter_id)  # レポートする人のUserObject
-    tweet_obj = save_create_twit(
-                 tweet_id   = tweet_id, 
-                 tweet      = '', #tweet.decode('utf-8'), 
-                 user       = user_obj, 
-                 tweeted_at = twit_data['created_at']
-                 )
+      # Reportを生成　デマレートを計算して保存
+      repo = models.Report.get_or_insert(
+                           key_name = "%s_%s"%(user_obj.user_id, tweet_obj.tweet_id), 
+                           reporter = user_obj, 
+                           tweet = tweet_obj, 
+                           )
+      
+      before_flag = repo.dema_flag
+      repo.dema_flag = flag
+      dema_delta = [0, 0]
 
-    ## Reportを生成　デマレートを計算して保存
-    repo = models.Report.get_or_insert(
-                         key_name = "%s_%s"%(user_obj.user_id, tweet_obj.tweet_id), 
-                         reporter = user_obj, 
-                         tweet = tweet_obj, 
-                         )
-    
-    before_flag = repo.dema_flag
-    repo.dema_flag = flag
-    dema_delta = [0, 0]
+      if before_flag == 1:
+          dema_delta[0] -= 1
+      elif before_flag == -1:
+          dema_delta[1] -= 1
 
-    if before_flag == 1:
-        dema_delta[0] -= 1
-    elif before_flag == -1:
-        dema_delta[1] -= 1
+      if flag == 1:
+          dema_delta[0] += 1
+      elif flag == -1:
+          dema_delta[1] += 1
 
-    if flag == 1:
-        dema_delta[0] += 1
-    elif flag == -1:
-        dema_delta[1] += 1
+      tweet_obj.set_dema_cnt(*dema_delta)
+      tweet_obj.put()
+       
+      repo.put()
+      status = 'ok'
+    else:
+      status = 'ng'
 
-    tweet_obj.set_dema_cnt(*dema_delta)
-    tweet_obj.put()
-     
-    repo.put()
-    res = {'staus':'ok'} 
-    res_json = json.dumps(res)
-    return res_json
+    res = {'staus':status} 
+    return json.dumps(res)
 
 
 # デマレポート処理  ###################################################
-#@views_v2.route('/api/entry/<tweet_id_arg>')
 @views_v2.route('/api/entry', methods=['GET', 'POST'])
 def dema_get():
-    if g.user is None:
-        return redirect(url_for('login', next=request.url)) 
-    tweet_id = int(request.args.get('tweet_id'))
+    tweet_id = request.args.get('tweet_id', type=int)
+    user_obj = get_user(reporter_id)  # レポートする人のUserObject
 
     #Response(headers)['Content-Type'] = 'application/json'
     try:
@@ -105,11 +117,11 @@ def show_tweet(tweet_id):
     if tweet is None:
         return json.dumps({ "status": "ng", "text": "Not Found"})
     ret = tweet_to_obj(tweet)
-    ret["status"] = "success"
+    ret["status"] = "ok"
     return json.dumps(ret)
 
 
-# デマレポート処理  #####################################################
+# デマランキング処理  #####################################################
 @views_v2.route('/api/ranking', methods=['GET', 'POST'])
 def dema_ranking():
       # TODO: ユーザ認証
@@ -165,7 +177,6 @@ def save_create_twit(tweet_id, tweet, user,tweeted_at):
     user : 投稿者のUserエンティティ
     """
     import datetime
-    #print tweeted_at
     dd = datetime.datetime.strptime(tweeted_at, '%a %b %d %H:%M:%S +0000 %Y')
     entity = models.Tweet.get_or_insert(key_name = str(tweet_id),
                                         tweet_id = tweet_id,
