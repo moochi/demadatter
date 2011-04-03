@@ -35,6 +35,7 @@ def get_status_by_tweet_id(tweet_id):
           logging.info(data['text'])
         else:
           logging.info('data has no text elements')
+          logging.info(str(response.content))
         return json.loads(response.content)
 
     return None

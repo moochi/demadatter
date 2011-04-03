@@ -38,6 +38,10 @@
       var api_url='/v2/api/post?';
       var req_url=''+api_url+'tweet_id='+tweet_id+'&flag='+flag;
       console.info(req_url);
+      if (tweet_id.match(/[0-9]{17}$/)==null){
+        alert('Tweet IDが不正です');
+        return 
+      }
       $.getJSON(
           req_url,
           null,
@@ -53,10 +57,12 @@
 
   <h1 style="text-align:center">デマだったーTOP</h1>
   <center>
-  <a href="/mobile">モバイル版 トップページ (要Login)</a><br>
+  <a href="/mobile">モバイル版</a><br>
 
 {% if p.usr %}
 <a href="/logout">ログアウト</a> {{ p.usr.screen_name }} <p>
+一発登録ブックマークレット＞
+<a href="javascript:(function(){var%20tweet_id=location.href.match(/[0-9]{17}$/)[0];location.href='http://1000.demadatter-dev.appspot.com/v2/api/post?flag=1&tweet_id='+encodeURI(tweet_id);}())">コレを登録</a><hr>
 
     デマ投稿Form<br />
     Tweet_id : <input name="tweet_id" value="" id='tweet_id'/><br />
