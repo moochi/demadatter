@@ -70,13 +70,9 @@
   </center>
 {% endif %}
 {% if not p.usr %}
-{{ p.user }}
+{{ p.usr }}
 <a href="/login">ログイン</a><br>
 {% endif %}
-
-
-
-
 
 {% with messages = get_flashed_messages() %}
   {% if messages %}
@@ -87,9 +83,6 @@
     </ul>
   {% endif %}
 {% endwith %}
-
-
-
 
   </body>
 </html>

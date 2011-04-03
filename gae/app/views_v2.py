@@ -46,6 +46,8 @@ def dema_add():
    
     ## Userオブジェクト作成
     user_obj = get_user(reporter_id)  # レポートする人のUserObject
+    reporter_obj = models.Reporter(user=user_obj)
+    reporter_obj.put()
 
     ## tweet obj作成
     twit_data =  get_status_by_tweet_id(tweet_id)
@@ -58,12 +60,14 @@ def dema_add():
                                           tweet_id = tweet_id,
                                           tweet = twit_data['text'],
                                           screen_name = twit_data['user']['screen_name'], 
+                                          user = get_user(twit_data['user']['id_str'], twit_data['user']), 
+                                          lang = twit_data['user']['lang'], 
                                           tweeted_at = dd)
    
       # Reportを生成　デマレートを計算して保存
       repo = models.Report.get_or_insert(
                            key_name = "%s_%s"%(user_obj.user_id, tweet_obj.tweet_id), 
-                           reporter = user_obj, 
+                           reporter = reporter_obj, 
                            tweet = tweet_obj, 
                            )
       
@@ -161,18 +165,29 @@ def tweet_to_obj(tweet):
     return {"tweet_id": tweet.tweet_id,
             "text": tweet.tweet,
             "user": {
-                "name": "nitoyon",       #tweet.user.name,
-                "screen_name": "nitoyon",#tweet.user.screen_name
-                "id": 1,
+                "name": tweet.user.user_name,
+                "screen_name": tweet.user.screen_name, 
+                "id": tweet.user.twitter_user_id,
             },
             "dema_count": tweet.dema_count,
             "non_dema_count": tweet.non_dema_count,
             "dema_score": tweet.dema_score,
+            "tweeted_at": str(tweet.get_jst()), 
            }    
 
 #######  Utility
-def get_user(user_id):
-    usr = models.User.get_or_insert(key_name = user_id, user_id = user_id )
-    return usr
+def get_user(user_id, user_arr=None):
+    #usr = models.User.get_or_insert(key_name = user_id, user_id = user_id )
+    user = models.User.get_by_key_name(user_id)
+
+    # user never signed on
+    if user is None:
+        user = models.User.get_or_insert(key_name=user_id)
+        user.user_id = user_id
+        user.twitter_user_id = user_id
+        user.screen_name = user_arr['screen_name']
+        user.user_name = user_arr['name']
+        user.put()
+    return user
 
 

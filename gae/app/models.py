@@ -3,12 +3,18 @@
 Python Datastore API: http://code.google.com/appengine/docs/python/datastore/
 """
 
+import hashlib
 from google.appengine.ext import db
+
 class User(db.Model):
     u"""ユーザ情報
     key_name… user_id"""
-    # TwitterUserID
+    # demadatter User ID
     user_id = db.StringProperty()
+    # session key
+    session_key = db.StringProperty()
+    # TwitterUserID
+    twitter_user_id = db.StringProperty()
     # デマ数
     dema_count = db.IntegerProperty()
     # デマ率（発言数におけるデマ率）
@@ -27,12 +33,16 @@ class User(db.Model):
     #TOKEN_LENGTH = 20
     twitter_oauth_token = db.StringProperty()
     twitter_oauth_secret = db.StringProperty()
-    twitter_user_id =  db.StringProperty()
     # 発言者のスクリーンネーム
-    screen_name = db.StringProperty()
+    screen_name = db.TextProperty()
     # 発言者のユーザ名
-    user_name = db.StringProperty()
-
+    user_name = db.TextProperty()
+    def get_session_token(self):
+        if self.twitter_oauth_token != None:
+            base_token = self.twitter_oauth_token.split('-')[0] + 'demadatter'
+            return hashlib.sha1(base_token).hexdigest()
+    def set_session_token(self):
+        self.session_key = self.get_session_token()
 
 
 class Reporter(db.Model):
@@ -44,6 +54,7 @@ class Reporter(db.Model):
     updated_at = db.DateTimeProperty(auto_now=True)
     # Userエンティティ
     user = db.ReferenceProperty(User)
+
 
 class Tweet(db.Model):
     u"""ツイート情報
@@ -60,6 +71,8 @@ class Tweet(db.Model):
     user = db.ReferenceProperty(User)
     # 本文
     tweet = db.StringProperty()
+    # 言語
+    lang = db.StringProperty()
     # デマ報告数
     dema_count = db.IntegerProperty(default=0)
     # 非デマ報告数
@@ -101,7 +114,7 @@ class Report(db.Model):
     # 更新日時
     updated_at = db.DateTimeProperty(auto_now=True)
     # Reporterエンティティ
-    reporter = db.ReferenceProperty(User)  # 後々Reporterに差し替える
+    reporter = db.ReferenceProperty(Reporter)  # 後々Reporterに差し替える
     # Tweetエンティティ
     tweet = db.ReferenceProperty(Tweet)
     # デマフラグ

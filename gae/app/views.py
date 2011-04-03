@@ -107,26 +107,27 @@ def oauth_authorized(resp):
         flash(u'You denied the request to sign in.')
         return redirect(next_url)
 
-    #user = models.User.get_by_key_name(resp['screen_name'])
-    user = models.User.get_by_key_name(resp['oauth_token'])
-
+    user = models.User.get_by_key_name(resp['user_id'])
 
     # user never signed on
     if user is None:
-        user = models.User.get_or_insert(key_name=resp['oauth_token'])
-        user.user_id = resp['oauth_token']
+        user = models.User.get_or_insert(key_name=resp['user_id'])
+        user.user_id = resp['user_id']
         user.put()
 
     # in any case we update the authenciation token in the db
     # In case the user temporarily revoked access we will have
     # new tokens here.
+    user.user_id = resp['user_id']
+    user.twitter_user_id = resp['user_id']
+    user.screen_name = resp['screen_name']
+
     user.twitter_oauth_token = resp['oauth_token']
     user.twitter_oauth_secret = resp['oauth_token_secret']
-    user.screen_name = resp['screen_name']
-    user.twitter_user_id = resp['user_id']
+    user.set_session_token()
     user.put()
 
-    session['user_id'] = resp['oauth_token']
+    session['user_id'] = user.user_id
     flash('You were signed in')
     return redirect(next_url)
 
@@ -136,3 +137,6 @@ def page_not_found(error):
     return render_template('404.html'), 404
 
 
+def make_session_key(keyID):
+    base_token = str(keyID) + 'demadatter'
+    return hashlib.sha1(base).hexdigest()

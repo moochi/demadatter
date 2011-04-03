@@ -43,3 +43,46 @@ if __name__ == '__main__':
   sample_tweet_id = 53390888138846208
   print get_status_by_tweet_id(sample_tweet_id)
 
+
+'''
+Tweetに埋めこまれているUser情報
+user: {
+  profile_sidebar_border_color: "2F5D69"
+  default_profile_image: false
+  description: "wave班 http://twilog.org/atusibrあつし or atusi "
+  location: "港区,  東京都 JP"
+  lang: "ja"
+  profile_use_background_image: true
+  profile_background_color: "FFFFFF"
+  show_all_inline_media: true
+  follow_request_sent: false
+  profile_background_image_url: "http://a3.twimg.com/profile_background_images/22076832/_____1.png"
+  is_translator: false
+  geo_enabled: true
+  created_at: "Mon Apr 09 18:54:08 +0000 2007"
+  default_profile: false
+  statuses_count: 16978
+  time_zone: "Tokyo"
+  profile_text_color: "374C64"
+  contributors_enabled: false
+  following: true
+  friends_count: 1028
+  profile_sidebar_fill_color: "CCF3F3"
+  followers_count: 1436
+  protected: false
+  id_str: "3933331"
+  listed_count: 119
+  profile_background_tile: false
+  favourites_count: 76
+  profile_image_url: "http://a3.twimg.com/profile_images/500679931/a2c_meca_normal.jpg"
+  name: "a2c"
+  id: 3933331
+  verified: false
+  notifications: false
+  utc_offset: 32400
+  profile_link_color: "C300CB"
+  url: "http://d.hatena.ne.jp/a2c/"
+  screen_name: "atusi"
+}
+'''
+
