@@ -17,7 +17,7 @@ root_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(root_dir, 'lib'))
 
 from flask import Module,  render_template, session, g, redirect
-from flask import make_response, Response
+from flask import make_response, Response, url_for
 from flask import request
 from flask import json
 from twitter import get_status_by_tweet_id
@@ -46,7 +46,7 @@ def dema_add():
    
     ## Userオブジェクト作成
     user_obj = get_user(reporter_id)  # レポートする人のUserObject
-    reporter_obj = models.Reporter(user=user_obj)
+    reporter_obj = models.Reporter.get_or_insert(key_name = reporter_id, user=user_obj)
     reporter_obj.put()
 
     ## tweet obj作成
