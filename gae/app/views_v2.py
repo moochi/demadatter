@@ -52,13 +52,14 @@ def dema_add():
 
     if twit_data.has_key('text'):
       tweet_test = twit_data['text']
-      tweet_obj = save_create_twit(
-                   user       = user_obj, 
-                   tweet_id   = tweet_id, 
-                   tweet      = u"%s"%twit_data['text'], 
-                   tweeted_at = twit_data['created_at']
-                   )
-
+      import datetime
+      dd = datetime.datetime.strptime(twit_data['created_at'], '%a %b %d %H:%M:%S +0000 %Y')
+      tweet_obj = models.Tweet.get_or_insert(key_name = str(tweet_id),
+                                          tweet_id = tweet_id,
+                                          tweet = twit_data['text'],
+                                          screen_name = twit_data['user']['screen_name'], 
+                                          tweeted_at = dd)
+   
       # Reportを生成　デマレートを計算して保存
       repo = models.Report.get_or_insert(
                            key_name = "%s_%s"%(user_obj.user_id, tweet_obj.tweet_id), 
@@ -170,22 +171,6 @@ def tweet_to_obj(tweet):
            }    
 
 #######  Utility
-def save_create_twit(tweet_id, tweet, user, tweeted_at):
-    u"""
-    tweet_id : Tweet ID
-    tweet : Tweet 本文
-    user : 投稿者のUserエンティティ
-    """
-    import datetime
-    dd = datetime.datetime.strptime(tweeted_at, '%a %b %d %H:%M:%S +0000 %Y')
-    entity = models.Tweet.get_or_insert(key_name = str(tweet_id),
-                                        tweet_id = tweet_id,
-                                        tweet = tweet,
-                                        user = user, 
-                                        tweeted_at = dd)
-    return entity   
-    
-
 def get_user(user_id):
     usr = models.User.get_or_insert(key_name = user_id, user_id = user_id )
     return usr
