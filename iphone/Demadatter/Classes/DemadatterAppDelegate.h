@@ -12,7 +12,8 @@
 
 @interface DemadatterAppDelegate : NSObject <UIApplicationDelegate> {
     UIWindow *window;
-    DemadatterViewController *viewController;
+    //DemadatterViewController *viewController;
+	UINavigationController *navi;
 }
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
