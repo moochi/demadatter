@@ -40,7 +40,11 @@ def dema_count():
     result = ['token=%s' % token]
     tweet = get_twit(tweetid)
     if tweet:
-        result.append('%s=%d' % (tweetid,tweet.dema_count))
+        count = tweet.dema_count
+        if count == 0:
+            count = tweet.count
+
+        result.append('%s=%d' % (tweetid,count))
     else:
         result.append('%s=0' % tweetid)
     result = '\n'.join(result)
@@ -56,25 +60,40 @@ def dema_add():
 
     tweetid = request.args.get('tweetid')
     # レポート追加
-    # models.Report(token=token,tweetid=tweetid).put()
+    report = models.Report(token=token,tweetid=tweetid)
     # # ツイート更新
-    # tweet = models.Tweet.all().filter('tweetid =', tweetid).get() or models.Tweet()
+    tweet = models.Tweet.all().filter('tweetid =', tweetid).get()
+    if tweet is None:
+        tweet = models.Tweet.all().filter('tweet_id =', tweetid).get() or models.Tweet()
+
     # # ツイートID
-    # tweet.tweetid = tweetid
+    tweet.tweetid = tweetid
+    tweet.tweet_id = tweetid
     # # ツイート日時
-    # tweet.createdat = datetime.fromtimestamp(float(request.args.get('created_at')))
+    tweet.createdat = datetime.fromtimestamp(float(request.args.get('created_at')))
+    tweet.tweeted_at = datetime.fromtimestamp(float(request.args.get('created_at')))
     # # 本文
-    # tweet.tweet = request.args.get('tweet')
+    tweet.tweet = request.args.get('tweet')
     # # 発言者のスクリーンネーム
-    # tweet.screen_name = request.args.get('screen_name')
+    tweet.screen_name = request.args.get('screen_name')
     # # 発言者のユーザ名
-    # tweet.user_name = request.args.get('user_name')
+    tweet.user_name = request.args.get('user_name')
+
     # # レポート件数
-    # tweet.count = models.Report.all().filter('tweetid =', tweetid).count()
+    count = models.Report.all().filter('tweetid =', tweetid).count()
+
+    tweet.count = count
+    tweet.dema_count = count
+
+    tweet.lang = 'ja'
+
     # # 保存
-    # tweet.put()
-    # result.append('%s=%d' % (tweetid, tweet.count))
-    result.append('%s=%d' % (tweetid, 1))
+    tweet.put()
+
+    report.tweet = tweet;
+    report.put()
+
+    result.append('%s=%d' % (tweetid, tweet.count))
 
     # 結果出力
     result = '\n'.join(result)
@@ -86,6 +105,9 @@ def dema_add():
 def get_twit(tweet_id):
     #logging.debug('hoge %s' % (tweet_id))
     entity = models.Tweet.all().filter('tweet_id =',int(tweet_id)).get()
+    if entity is None:
+        entity = models.Tweet.all().filter('tweetid =',int(tweet_id)).get()
+
     return entity
 
 def getToken(token):

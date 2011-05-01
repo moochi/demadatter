@@ -1,8 +1,43 @@
 # -*- coding: utf-8 -*-
 
 from google.appengine.api import urlfetch
+from flask import g,session
 from django.utils import simplejson as json
+from flaskext.oauth import OAuth
 import logging
+
+def get_twitter_obj():
+    oauth = OAuth()
+    twitter = oauth.remote_app('twitter',
+        base_url='http://api.twitter.com/1/',
+        # where flask should look for new request tokens
+        request_token_url='http://api.twitter.com/oauth/request_token',
+        # where flask should exchange the token with the remote application
+        access_token_url='http://api.twitter.com/oauth/access_token',
+        # twitter knows two authorizatiom URLs.  /authorize and /authenticate.
+        # they mostly work the same, but for sign on /authenticate is
+        # expected because this will give the user a slightly different
+        # user interface on the twitter side.
+        #authorize_url='http://api.twitter.com/oauth/authenticate',
+        authorize_url='https://api.twitter.com/oauth/authorize',
+        consumer_key='qbAWqQcTBtOxPqbTh5Uag',
+        consumer_secret='TdKlsHpqaSzVfZircnOEoANdsylCskNsgQcvJNMqfk'
+    )
+    twitter.tokengetter(get_twitter_token)
+    return twitter
+
+def get_twitter_token():
+    """This is used by the API to look for the auth token and secret
+    it should use for API calls.  During the authorization handshake
+    a temporary set of token and secret is used, but afterwards this
+    function has to return the token and secret.  If you don't want
+    to store this in the database, consider putting it into the
+    session instead.
+    """
+    user = g.user
+    if user is not None:
+        return user.twitter_oauth_token, user.twitter_oauth_secret
+ 
 
 def get_status_by_tweet_id(tweet_id):
     """ tweet_id から中身を取得。
@@ -27,18 +62,14 @@ def get_status_by_tweet_id(tweet_id):
     if type(tweet_id) is not long and type(tweet_id) is not int:
         raise ValueError('tweet id must be int or long')
 
-    url = "http://api.twitter.com/1/statuses/show/%d.json" % tweet_id
-    response = urlfetch.fetch(url)
-    if response.content is not None:
-        data = json.loads(response.content)
-        if data.has_key('text'):
-          logging.info(data['text'])
-        else:
-          logging.info('data has no text elements')
-          logging.info(str(response.content))
-        return json.loads(response.content)
-
-    return None
+    twitter = get_twitter_obj()
+    url = "statuses/show/%d.json" % tweet_id
+    response = twitter.get(url)
+    #response = urlfetch.fetch(url)
+    if response.status == 200:
+        return response.data
+    else:
+        return None
 
 if __name__ == '__main__':
   sample_tweet_id = 53390888138846208

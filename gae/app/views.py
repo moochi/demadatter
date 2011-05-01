@@ -9,39 +9,14 @@ from flask import Module, url_for, render_template, request, redirect,\
                   session, g, flash
 from flaskext.oauth import OAuth
 import models
+import hashlib
 from forms import TodoForm
+from twitter import get_twitter_obj
 
 views = Module(__name__, 'views')
-oauth = OAuth()
-twitter = oauth.remote_app('twitter',
-    base_url='http://api.twitter.com/1/',
-    # where flask should look for new request tokens
-    request_token_url='http://api.twitter.com/oauth/request_token',
-    # where flask should exchange the token with the remote application
-    access_token_url='http://api.twitter.com/oauth/access_token',
-    # twitter knows two authorizatiom URLs.  /authorize and /authenticate.
-    # they mostly work the same, but for sign on /authenticate is
-    # expected because this will give the user a slightly different
-    # user interface on the twitter side.
-    #authorize_url='http://api.twitter.com/oauth/authenticate',
-    authorize_url='https://api.twitter.com/oauth/authorize',
-    consumer_key='qbAWqQcTBtOxPqbTh5Uag',
-    consumer_secret='TdKlsHpqaSzVfZircnOEoANdsylCskNsgQcvJNMqfk'
-)
+twitter = get_twitter_obj()
 
-@twitter.tokengetter
-def get_twitter_token():
-    """This is used by the API to look for the auth token and secret
-    it should use for API calls.  During the authorization handshake
-    a temporary set of token and secret is used, but afterwards this
-    function has to return the token and secret.  If you don't want
-    to store this in the database, consider putting it into the
-    session instead.
-    """
-    user = g.user
-    if user is not None:
-        return user.oauth_token, user.oauth_secret
- 
+
 @views.before_request
 def before_request():
     g.user = None
@@ -119,6 +94,7 @@ def oauth_authorized(resp):
     # In case the user temporarily revoked access we will have
     # new tokens here.
     user.user_id = resp['user_id']
+    user.token = make_session_key(resp['user_id'])
     user.twitter_user_id = resp['user_id']
     user.screen_name = resp['screen_name']
 
@@ -139,4 +115,4 @@ def page_not_found(error):
 
 def make_session_key(keyID):
     base_token = str(keyID) + 'demadatter'
-    return hashlib.sha1(base).hexdigest()
+    return hashlib.sha1(base_token).hexdigest()

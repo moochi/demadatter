@@ -227,7 +227,10 @@ class OAuthRemoteApp(object):
             assert format == 'urlencoded'
             if data is not None:
                 url = add_query(url, data)
-                data = None
+                data = ''
+            else:
+                data = ''
+
         else:
             if content_type is None:
                 data, content_type = encode_request_data(data, format)
